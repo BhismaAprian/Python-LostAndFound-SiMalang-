@@ -11,7 +11,8 @@ firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
 })
 
-ASSETS_PATH = Path(r"D:\Tubes\Beta V.1\build\assets\frame0")
+OUTPUT_PATH = Path(__file__).parent
+ASSETS_PATH = OUTPUT_PATH / "assets" / "frame0"
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
