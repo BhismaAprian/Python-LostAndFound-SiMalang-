@@ -1,4 +1,6 @@
 import firebase_admin
+from widget_lost import *
+from widget_found import *
 from firebase_admin import credentials, storage, db
 from pathlib import Path
 from customtkinter import CTk, CTkLabel, CTkFrame, CTkImage, set_appearance_mode
@@ -25,13 +27,29 @@ window.geometry("1128x1024")
 window.configure(bg="#F1F1F1")
 window.title("SIMALANG")
 
-header_label = CTkLabel(
+root = Tk()
+window.geometry("1128x1024")
+window.configure(bg = "#F1F1F1")
+
+canvas = Canvas(
     window,
-    text="Halo, 11241010",
-    font=("Poppins SemiBold", 16),
-    text_color="#000000"
+    bg = "#F1F1F1",
+    height = 1024,
+    width = 1128,
+    bd = 0,
+    highlightthickness = 0,
+    relief = "ridge"
 )
-header_label.place(x=900, y=41)
+
+canvas.place(x = 0, y = 0)
+
+# header_label = CTkLabel(
+#     window,
+#     text="Halo, 11241010",
+#     font=("Poppins SemiBold", 16),
+#     text_color="#000000"
+# )
+# header_label.place(x=900, y=41)
 
 sidebar_frame = CTkFrame(
     window,
@@ -75,42 +93,35 @@ def render_content(menu_name):
         content_label.place(relx=0.5, rely=0.5, anchor="center")
 
     elif menu_name == "Lost":
-        content_label = CTkLabel(
-            main_frame,
-        )
-        content_label.place(relx=0.5, rely=0.5, anchor="center")
+        render_lost_content(main_frame, ASSETS_PATH)  
     elif menu_name == "Found":
-        content_label = CTkLabel(
-            main_frame, text="Selamat Datang di Halaman Found", font=("Poppins SemiBold", 20)
-        )
-        content_label.place(relx=0.5, rely=0.5, anchor="center")
+        render_found_content(main_frame, ASSETS_PATH)  
+
 
 def select_menu(selected_name):
     global selected_menu
     for name, widgets in menu_frames.items():
         frame, label = widgets
         if name == selected_name:
-            menu_colors[name] = "#0067B3" 
-            frame.configure(fg_color="#0067B3")
-            label.configure(text_color="#FFFFFF")  
+            menu_colors[name] = "#e6f0f7" 
+            frame.configure(fg_color="#e6f0f7")
+            label.configure(text_color="#0067B3")  
         else:
             menu_colors[name] = "#FFFFFF"  
             frame.configure(fg_color="#FFFFFF")
             label.configure(text_color="#6E7191")  
     render_content(selected_name)
 
-
 def on_hover(event, frame, label, menu_name):
-    if menu_colors.get(menu_name, "#FFFFFF") != "#0067B3":  
+    if menu_colors.get(menu_name, "#FFFFFF") != "#e6f0f7":  
         frame.configure(fg_color="#E6E6E6")  
         label.configure(text_color="#000000")  
 
 
 def on_leave(event, frame, label, menu_name):
-    if menu_colors.get(menu_name, "#FFFFFF") != "#0067B3":  
+    if menu_colors.get(menu_name, "#FFFFFF") != "#e6f0f7":  
         frame.configure(fg_color="#FFFFFF")  
         label.configure(text_color="#6E7191") 
-
 
 start_y = 112  
 for item in menu_items:
