@@ -1,6 +1,8 @@
 import firebase_admin
+import pyrebase
 from widget_lost import *
 from widget_found import *
+from widget_home import *
 from firebase_admin import credentials, storage, db
 from pathlib import Path
 from customtkinter import CTk, CTkLabel, CTkFrame, CTkImage, set_appearance_mode
@@ -43,14 +45,6 @@ canvas = Canvas(
 
 canvas.place(x = 0, y = 0)
 
-# header_label = CTkLabel(
-#     window,
-#     text="Halo, 11241010",
-#     font=("Poppins SemiBold", 16),
-#     text_color="#000000"
-# )
-# header_label.place(x=900, y=41)
-
 sidebar_frame = CTkFrame(
     window,
     width=291,
@@ -87,10 +81,11 @@ def render_content(menu_name):
         widget.destroy()
 
     if menu_name == "Home":
-        content_label = CTkLabel(
-            main_frame, text="Selamat Datang di Home!", font=("Poppins SemiBold", 20)
-        )
-        content_label.place(relx=0.5, rely=0.5, anchor="center")
+        render_home_content(main_frame)
+        # content_label = CTkLabel(
+        #     main_frame, text="Selamat Datang di Home!", font=("Poppins SemiBold", 20)
+        # )
+        # content_label.place(relx=0.5, rely=0.5, anchor="center")
 
     elif menu_name == "Lost":
         render_lost_content(main_frame, ASSETS_PATH)  
