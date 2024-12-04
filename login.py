@@ -4,88 +4,87 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, messagebox
-from firebase_admin import credentials, firestore, auth
+from firebase_admin import credentials, firestore, auth, db
 import subprocess  
 import os
+import requests
+import sys
 
-# Initialize Firebase Admin
+API_KEY = "AIzaSyDDhFEVpqjSYbjVhbOj5AwlmmVavC868pM"  # Masukkan API Key dari Firebase
 cred = credentials.Certificate('D:/Tubes/Beta V.1/build/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
-firebase_admin.initialize_app(cred)
-
+firebase_admin.initialize_app(cred, {
+    'storageBucket': 'lostandfound-78452.appspot.com', 
+    'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
+})
 def login_with_google():
     try:
-        credentials_path = "client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json"  # Update path as needed
-        SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'openid']
-
+        credentials_path = "client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json"  # Path ke file client_secret.json
+        SCOPES = [
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/userinfo.email',
+            'openid'
+        ]
         flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
-        creds = flow.run_local_server(port=8080)  
+        creds = flow.run_local_server(port=8080)
 
-        id_token = creds.id_token  
+        id_token = creds.id_token
 
-    
-        if decoded_token['aud'] != 'lostandfound-78452':  # Your Firebase project ID
-            raise Exception("Audience claim in ID token is invalid!")
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key={API_KEY}"
 
-        email = decoded_token['email']  
+        payload = {
+            "postBody": f"id_token={id_token}&providerId=google.com",
+            "requestUri": "http://localhost",
+            "returnSecureToken": True
+        }
 
-        if "@student.itk.ac.id" not in email:
-            messagebox.showerror("Error", "Only @student.itk.ac.id email addresses are allowed.")
-            return
+        headers = {
+            'Content-Type': 'application/json',
+        }
 
-        db = firestore.client()
-        users_ref = db.collection('users')
+        response = requests.post(url, json=payload, headers=headers)
+        data = response.json()
 
-        user_doc = users_ref.where('email', '==', email).get()
-        if len(user_doc) == 0:
-            username = email.split('@')[0]  
-            users_ref.add({
-                'username': username,
-                'email': email
-            })
+        if response.status_code == 200:
+            email = data['email']
+            name = data['fullName']
 
-        messagebox.showinfo("Success", f"Login successful as {email}.")
-        subprocess.run(["python", "gui.py"])  
+            if "@student.itk.ac.id" not in email:
+                messagebox.showerror("Error", "Only @student.itk.ac.id email addresses are allowed.")
+                return
+
+            username = email.split('@')[0]
+            users_ref = db.reference('users')
+            
+            # user_docs = users_ref.order_by_child('id').limit_to_last(1).get()
+
+            # if user_docs:
+            #     last_user_id = next(iter(user_docs.values()))['id']  
+            #     new_user_id = last_user_id + 1  
+            #     print(f"New User ID: {new_user_id}")
+            # else:
+            #     new_user_id = 1  
+            #     print("No user data found.")
+            new_user_id = 1
+            
+            user_doc = users_ref.order_by_child('email').equal_to(email).get()
+            if not user_doc:  
+                users_ref.child(str(new_user_id)).set({
+                    'id': new_user_id,
+                    'name': name,
+                    'username': username,
+                    'email': email
+                })
+
+            messagebox.showinfo("Success", f"Login successful as {email}.")
+            subprocess.run(["python", "gui.py", str(new_user_id)])
+            sys.exit(0)
+
+        else:
+            messagebox.showerror("Error", f"Login failed: {data.get('error', {}).get('message', 'Unknown error')}")
 
     except Exception as e:
         messagebox.showerror("Error", f"Login failed: {str(e)}")
-
-# def login_with_google():
-#     try:
-#         flow = InstalledAppFlow.from_client_secrets_file(
-#             'client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json',
-#             scopes=['https://www.googleapis.com/auth/userinfo.email', 'openid']
-#         )
-
-#         credentials = flow.run_local_server(port=8080, open_browser=True)
-
-#         id_token = credentials.id_token
-
-#         user = auth.sign_in_with_custom_token(id_token)
-#         user_info = auth.get_account_info(user['idToken'])
-
-#         email = user_info['users'][0]['email']
         
-#         if "@student.itk.ac.id" not in email:
-#             messagebox.showerror("Error", "Hanya email @student.itk.ac.id yang diizinkan.")
-#             return
-
-    #     db = firestore.client()
-    #     users_ref = db.collection('users')
-        
-    #     user_doc = users_ref.where('email', '==', email).get()
-    #     if len(user_doc) == 0:
-    #         username = email.split('@')[0]  
-    #         users_ref.add({
-    #             'username': username,
-    #             'email': email
-    #         })
-
-    #     messagebox.showinfo("Success", f"Login berhasil sebagai {email}.")
-    #     subprocess.run(["python", "gui.py"])  
-
-    # except Exception as e:
-    #     messagebox.showerror("Error", f"Gagal login: {str(e)}")
-
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"D:\Tubes\Login\build\assets\frame0")
 
