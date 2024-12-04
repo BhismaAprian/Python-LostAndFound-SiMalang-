@@ -1,74 +1,93 @@
 from pathlib import Path
+from tkinter import PhotoImage, Canvas
 import customtkinter as ctk
+from PIL import Image
+from firebase_admin import db
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"D:\Tubes\widgetHome\build\assets\frame0")
+ASSETS_PATH = OUTPUT_PATH / "assets" / "frame0"
 
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
 
-def render_home_content(parent_frame):
+
+def render_home_content(parent_frame, user_id):
     for widget in parent_frame.winfo_children():
         widget.destroy()
 
-    canvas = ctk.CTkCanvas(
+    ref = db.reference(f'users/{user_id}')  
+    user_data = ref.get()
+    
+    if user_data:
+        user_name = user_data.get('name', 'Pengguna Tidak Ditemukan')
+        user_id_display = user_data.get('id', 'ID Tidak Ditemukan')
+        user_nim = user_data.get('username', 'Username Tidak Ditemukan')
+    else:
+        user_name = 'Pengguna Tidak Ditemukan'
+        user_id_display = 'ID Tidak Ditemukan'
+        user_nim = 'Username Tidak ditemukan'
+    
+    # Frame utama untuk area konten
+    content_frame = ctk.CTkFrame(
         parent_frame,
-        bg="#F1F1F1",
-        height=1024,
-        width=837,
-        bd=0,
-        highlightthickness=0
+        fg_color="#0067B3",
+        width=788,
+        height=233,
+        corner_radius=10
     )
-    canvas.place(x=0, y=0)
+    content_frame.place(x=39, y=134)
 
-    canvas.create_rectangle(
-        39.0,
-        134.0,
-        827.0,
-        367.0,
-        fill="#0067B3",
-        outline=""
-    )
+    ctk.CTkLabel(
+        content_frame,
+        text="September 4, 2023",
+        font=("Poppins Regular", 16),
+        text_color="#FFFFFF"
+    ).place(x=28, y=13)
 
-    image_image_1 = ctk.CTkImage(file=relative_to_assets("image_1.png"))
-    canvas.create_image(
-        595.0,
-        256.00000671037014,
-        image=image_image_1
-    )
+    ctk.CTkLabel(
+        content_frame,
+        text=f"Selamat Datang, {user_name}, \n NIM {user_nim}",
+        font=("Poppins SemiBold", 20),
+        text_color="#FFFFFF"
+    ).place(x=28, y=40)
 
-    image_image_2 = ctk.CTkImage(file=relative_to_assets("image_2.png"))
-    canvas.create_image(
-        715.0,
-        240.0,
-        image=image_image_2
+    description_text = (
+        "Aplikasi SiMALANG memudahkan mahasiswa dan staf ITK\n"
+        "dalam melaporkan atau mencari barang hilang dan ditemukan.\n"
+        "Pengguna dapat mengunggah data barang serta melihat daftar\n"
+        "barang yang terdaftar di sistem."
     )
+    ctk.CTkLabel(
+        content_frame,
+        text=description_text,
+        font=("Poppins Regular", 14),
+        text_color="#FFFFFF",
+        justify="left"
+    ).place(x=28, y=120)
 
-    canvas.create_text(
-        67.0,
-        147.0,
-        anchor="nw",
-        text="September 4,  2023",
-        fill="#FFFFFF",
-        font=("Poppins Regular", 16)
-    )
+    image_path_2 = relative_to_assets("widget_home2.png")
+    image2 = ctk.CTkImage(Image.open(image_path_2), size=(320, 258))
+    ctk.CTkLabel(content_frame, image=image2, text="").place(x=510, y=15)
+    
+    # table_frame = ctk.CTkFrame(parent_frame)
+    # table_frame.pack(pady=20, padx=20, fill="both", expand=True)
 
-    canvas.create_text(
-        67.0,
-        221.0,
-        anchor="nw",
-        text="Aplikasi SiMALANG memudahkan mahasiswa dan staf ITK dalam melaporkan atau mencari barang hilang dan ditemukan. Pengguna dapat mengunggah data barang serta melihat daftar barang yang terdaftar di sistem.",
-        fill="#FFFFFF",
-        font=("Poppins Regular", 14)
-    )
+    # # Header Tabel
+    # headers = ["No", "Nama", "Kelas", "Nilai"]
+    # for col, header in enumerate(headers):
+    #     ctk.CTkLabel(table_frame, text=header, width=100, height=30, fg_color="lightblue").grid(row=0, column=col, padx=5, pady=5)
 
-    canvas.create_text(
-        67.0,
-        171.0,
-        anchor="nw",
-        text="Selamat Datang, 11241010",
-        fill="#FFFFFF",
-        font=("Poppins SemiBold", 32)
-    )
+    # # Data Tabel
+    # data = [
+    #     [1, "Ali", "XII IPA 1", 90],
+    #     [2, "Budi", "XII IPA 2", 85],
+    #     [3, "Siti", "XII IPA 3", 95]
+    # ]
+
+    # # Isi Tabel
+    # for row, row_data in enumerate(data, start=1):
+    #     for col, item in enumerate(row_data):
+    #         ctk.CTkLabel(table_frame, text=item, width=100, height=30, fg_color="white").grid(row=row, column=col, padx=5, pady=5)
+
