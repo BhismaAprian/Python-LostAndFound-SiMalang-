@@ -8,12 +8,19 @@ from pathlib import Path
 from customtkinter import CTk, CTkLabel, CTkFrame, CTkImage, set_appearance_mode
 from PIL import Image
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
+import sys
 
 cred = credentials.Certificate('D:/Tubes/Beta V.1/build/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'lostandfound-78452.appspot.com', 
     'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
 })
+
+if len(sys.argv) > 1:
+    new_user_id = sys.argv[1]  # Menangkap new_user_id dari argumen
+else:
+    new_user_id = None  # Menangani jika tidak ada argumen
+
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / "assets" / "frame0"
@@ -81,7 +88,7 @@ def render_content(menu_name):
         widget.destroy()
 
     if menu_name == "Home":
-        render_home_content(main_frame)
+        render_home_content(main_frame,new_user_id)
         # content_label = CTkLabel(
         #     main_frame, text="Selamat Datang di Home!", font=("Poppins SemiBold", 20)
         # )
