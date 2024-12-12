@@ -7,19 +7,15 @@ from firebase_admin import db
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / "assets" / "frame0"
 
-
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
-
-
 
 def render_home_content(parent_frame, user_id):
     for widget in parent_frame.winfo_children():
         widget.destroy()
-
+        
     ref = db.reference(f'users/{user_id}')  
     user_data = ref.get()
-    
     if user_data:
         user_name = user_data.get('name', 'Pengguna Tidak Ditemukan')
         user_id_display = user_data.get('id', 'ID Tidak Ditemukan')
@@ -29,7 +25,6 @@ def render_home_content(parent_frame, user_id):
         user_id_display = 'ID Tidak Ditemukan'
         user_nim = 'Username Tidak ditemukan'
     
-    # Frame utama untuk area konten
     content_frame = ctk.CTkFrame(
         parent_frame,
         fg_color="#0067B3",
