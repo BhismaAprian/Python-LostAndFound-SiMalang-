@@ -9,16 +9,43 @@ import subprocess
 import os
 import requests
 import sys
+import customtkinter as ctk
+import threading
 
-API_KEY = "AIzaSyDDhFEVpqjSYbjVhbOj5AwlmmVavC868pM"  # Masukkan API Key dari Firebase
+
+API_KEY = "AIzaSyDDhFEVpqjSYbjVhbOj5AwlmmVavC868pM"  
 cred = credentials.Certificate('D:/Tubes/Beta V.1/build/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'lostandfound-78452.appspot.com', 
     'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
 })
+
+def show_popup(title, message, popup_type="success"):
+    popup = ctk.CTkToplevel()
+    popup.geometry("300x200")
+    popup.title(title)
+    popup.grab_set()
+
+    colors = {"success": "green", "error": "red", "info": "blue"}
+    bg_color = colors.get(popup_type, "gray")
+
+    header = ctk.CTkLabel(popup, text=title, font=("Arial", 18, "bold"), fg_color=bg_color, text_color="white")
+    header.pack(fill="x", pady=(0, 10))
+
+    message_label = ctk.CTkLabel(popup, text=message, font=("Arial", 14), wraplength=250)
+    message_label.pack(pady=20)
+
+    close_button = ctk.CTkButton(popup, text="Close", command=popup.destroy, fg_color="gray")
+    close_button.pack(pady=10)
+
+    for i in range(0, 101, 5):
+        popup.attributes("-alpha", i / 100)
+        popup.update()
+        popup.after(10)
+        
 def login_with_google():
     try:
-        credentials_path = "client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json"  # Path ke file client_secret.json
+        credentials_path = "client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json"
         SCOPES = [
             'https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email',
@@ -37,9 +64,7 @@ def login_with_google():
             "returnSecureToken": True
         }
 
-        headers = {
-            'Content-Type': 'application/json',
-        }
+        headers = {'Content-Type': 'application/json'}
 
         response = requests.post(url, json=payload, headers=headers)
         data = response.json()
@@ -49,25 +74,14 @@ def login_with_google():
             name = data['fullName']
 
             if "@student.itk.ac.id" not in email:
-                messagebox.showerror("Error", "Only @student.itk.ac.id email addresses are allowed.")
+                show_popup("Error", "Hanya Email @student.itk.ac.id Saja yang diizinkan.", "error")
                 return
 
             username = email.split('@')[0]
             users_ref = db.reference('users')
-            
-            # user_docs = users_ref.order_by_child('id').limit_to_last(1).get()
-
-            # if user_docs:
-            #     last_user_id = next(iter(user_docs.values()))['id']  
-            #     new_user_id = last_user_id + 1  
-            #     print(f"New User ID: {new_user_id}")
-            # else:
-            #     new_user_id = 1  
-            #     print("No user data found.")
             new_user_id = 1
-            
             user_doc = users_ref.order_by_child('email').equal_to(email).get()
-            if not user_doc:  
+            if not user_doc:
                 users_ref.child(str(new_user_id)).set({
                     'id': new_user_id,
                     'name': name,
@@ -75,18 +89,29 @@ def login_with_google():
                     'email': email
                 })
 
-            messagebox.showinfo("Success", f"Login successful as {email}.")
-            subprocess.run(["python", "gui.py", str(new_user_id)])
-            sys.exit(0)
+            show_popup("Success", f"Login Berhasil as {email} , {name} .", "success")
+
+            threading.Thread(target=run_gui, args=(new_user_id,)).start()
 
         else:
-            messagebox.showerror("Error", f"Login failed: {data.get('error', {}).get('message', 'Unknown error')}")
+            show_popup("Error", f"Login failed: {data.get('error', {}).get('message', 'Unknown error')}", "error")
 
     except Exception as e:
-        messagebox.showerror("Error", f"Login failed: {str(e)}")
+        show_popup("Error", f"Login failed: {str(e)}", "error")
+
+def run_gui(user_id):
+
+    try:
+        subprocess.run(["python", "gui.py", str(user_id)])
+    except Exception as e:
+        print(f"Error running GUI: {e}")
+
+def close_login():
+    window.destroy()
+
         
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"D:\Tubes\Login\build\assets\frame0")
+ASSETS_PATH = OUTPUT_PATH / "assets" / "frame0"
 
 
 def relative_to_assets(path: str) -> Path:
@@ -111,7 +136,7 @@ canvas = Canvas(
 
 canvas.place(x = 0, y = 0)
 image_image_1 = PhotoImage(
-    file=relative_to_assets("image_1.png"))
+    file=relative_to_assets("itk.png"))
 image_1 = canvas.create_image(
     150.0,
     450.0,
@@ -156,7 +181,7 @@ canvas.create_text(
     890.0,
     255.0,
     anchor="nw",
-    text="Login with Google",
+    text="Login with Google",   
     fill="#2E2E2E",
     font=("Poppins Regular", 16 * -1)
 )
@@ -181,7 +206,7 @@ canvas.create_text(
     922.0,
     329.0,
     anchor="nw",
-    text="OR",
+    text="---",
     fill="#FFFFFF",
     font=("Poppins Regular", 16 * -1)
 )
@@ -195,7 +220,7 @@ canvas.create_rectangle(
     outline="")
 
 image_image_2 = PhotoImage(
-    file=relative_to_assets("image_2.png"))
+    file=relative_to_assets("email.png"))
 image_2 = canvas.create_image(
     685.0,
     430.0,
@@ -229,7 +254,7 @@ canvas.create_rectangle(
     outline="")
 
 image_image_3 = PhotoImage(
-    file=relative_to_assets("image_3.png"))
+    file=relative_to_assets("key.png"))
 image_3 = canvas.create_image(
     685.0,
     529.0,
@@ -255,7 +280,7 @@ canvas.create_text(
 )
 
 button_image_1 = PhotoImage(
-    file=relative_to_assets("button_1.png"))
+    file=relative_to_assets("button_login.png"))
 button_1 = Button(
     image=button_image_1,
     borderwidth=0,
@@ -271,7 +296,7 @@ button_1.place(
 )
 
 image_image_4 = PhotoImage(
-    file=relative_to_assets("image_4.png"))
+    file=relative_to_assets("google.png"))
 image_4 = canvas.create_image(
     865.0,
     264.0,
