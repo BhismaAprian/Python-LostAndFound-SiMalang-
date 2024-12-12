@@ -17,7 +17,7 @@ firebase_admin.initialize_app(cred, {
 })
 
 if len(sys.argv) > 1:
-    new_user_id = sys.argv[1]  # Menangkap new_user_id dari argumen
+    new_user_id = sys.argv[1]  
 else:
     new_user_id = None  # Menangani jika tidak ada argumen
 
@@ -32,13 +32,9 @@ def relative_to_assets(path: str) -> Path:
 set_appearance_mode("light")
 
 window = CTk()
-window.geometry("1128x1024")
+window.geometry("1128x784")
 window.configure(bg="#F1F1F1")
 window.title("SIMALANG")
-
-root = Tk()
-window.geometry("1128x1024")
-window.configure(bg = "#F1F1F1")
 
 canvas = Canvas(
     window,
@@ -49,7 +45,6 @@ canvas = Canvas(
     highlightthickness = 0,
     relief = "ridge"
 )
-
 canvas.place(x = 0, y = 0)
 
 sidebar_frame = CTkFrame(
@@ -82,22 +77,16 @@ menu_colors = {}
 main_frame = CTkFrame(window, width=837, height=1024, fg_color="#F1F1F1", corner_radius=0)
 main_frame.place(x=291, y=0)
 
-
 def render_content(menu_name):
     for widget in main_frame.winfo_children():
         widget.destroy()
 
     if menu_name == "Home":
-        render_home_content(main_frame,new_user_id)
-        # content_label = CTkLabel(
-        #     main_frame, text="Selamat Datang di Home!", font=("Poppins SemiBold", 20)
-        # )
-        # content_label.place(relx=0.5, rely=0.5, anchor="center")
-
+        render_home_content(main_frame, new_user_id)
     elif menu_name == "Lost":
-        render_lost_content(main_frame, ASSETS_PATH)  
+        render_lost_content(main_frame, ASSETS_PATH, new_user_id)  
     elif menu_name == "Found":
-        render_found_content(main_frame, ASSETS_PATH)  
+        render_found_content(main_frame, ASSETS_PATH, new_user_id)  
 
 
 def select_menu(selected_name):
