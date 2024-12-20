@@ -34,9 +34,10 @@ def render_home_content(parent_frame, user_id):
     )
     content_frame.place(x=39, y=134)
 
+
     ctk.CTkLabel(
         content_frame,
-        text="September 4, 2023",
+        text="Desember 18, 2024",
         font=("Poppins Regular", 16),
         text_color="#FFFFFF"
     ).place(x=28, y=13)
