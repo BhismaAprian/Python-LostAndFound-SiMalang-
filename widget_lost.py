@@ -18,8 +18,8 @@ def fetch_lost_items():
 
 
 def render_lost_content(parent_frame,  assets_path, user_id):
-    ITEMS_PER_PAGE = 2  # Jumlah item per halaman
-    current_page = [1]  # Gunakan list agar nilai dapat dimodifikasi dalam fungsi
+    ITEMS_PER_PAGE = 2  
+    current_page = [1] 
     
     print(f"INI ADALAH USER ID ======={user_id}")
     
@@ -99,7 +99,7 @@ def render_lost_content(parent_frame,  assets_path, user_id):
                 lost_frame,
                 width=115,
                 height=25,
-                fg_color="#FFF5D9" if not item_data['is_found'] else "#DCFAF8",  # Warna latar tergantung status
+                fg_color="#FFF5D9" if not item_data['is_found'] else "#DCFAF8",  
                 corner_radius=0
             )
             rectangle1.place(x=550, y=10)  
