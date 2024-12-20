@@ -1,4 +1,3 @@
-import pyrebase
 import firebase_admin
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -6,9 +5,7 @@ from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, messagebox
 from firebase_admin import credentials, firestore, auth, db
 import subprocess  
-import os
 import requests
-import sys
 import customtkinter as ctk
 import threading
 
@@ -79,7 +76,7 @@ def login_with_google():
 
             username = email.split('@')[0]
             users_ref = db.reference('users')
-            new_user_id = 1
+            new_user_id = 2
             user_doc = users_ref.order_by_child('email').equal_to(email).get()
             if not user_doc:
                 users_ref.child(str(new_user_id)).set({
