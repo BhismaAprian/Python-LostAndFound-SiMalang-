@@ -5,7 +5,7 @@ from firebase_admin import credentials, storage, db
 from io import BytesIO
 import requests
 import os
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 def upload_image_to_firebase(image_path):
     bucket = storage.bucket()
@@ -40,7 +40,7 @@ def submit_form(item_name, location, description, user_id, image_path):
     }
     
     save_to_firebase(data)
-    print(f"Item {item_name} telah disimpan ke Firebase.")
+    messagebox.showinfo("Success", f"Item {item_name} telah disimpan ke Firebase.")
 
 def upload_photo():
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg;*.jpeg;*.png")])
