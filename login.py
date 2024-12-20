@@ -1,93 +1,114 @@
-import pyrebase
 import firebase_admin
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, messagebox
-from firebase_admin import credentials, firestore, auth
+from firebase_admin import credentials, firestore, auth, db
 import subprocess  
-import os
+import requests
+import customtkinter as ctk
+import threading
 
-# Initialize Firebase Admin
+
+API_KEY = "AIzaSyDDhFEVpqjSYbjVhbOj5AwlmmVavC868pM"  
 cred = credentials.Certificate('D:/Tubes/Beta V.1/build/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, {
+    'storageBucket': 'lostandfound-78452.appspot.com', 
+    'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
+})
 
+def show_popup(title, message, popup_type="success"):
+    popup = ctk.CTkToplevel()
+    popup.geometry("300x200")
+    popup.title(title)
+    popup.grab_set()
+
+    colors = {"success": "green", "error": "red", "info": "blue"}
+    bg_color = colors.get(popup_type, "gray")
+
+    header = ctk.CTkLabel(popup, text=title, font=("Arial", 18, "bold"), fg_color=bg_color, text_color="white")
+    header.pack(fill="x", pady=(0, 10))
+
+    message_label = ctk.CTkLabel(popup, text=message, font=("Arial", 14), wraplength=250)
+    message_label.pack(pady=20)
+
+    close_button = ctk.CTkButton(popup, text="Close", command=popup.destroy, fg_color="gray")
+    close_button.pack(pady=10)
+
+    for i in range(0, 101, 5):
+        popup.attributes("-alpha", i / 100)
+        popup.update()
+        popup.after(10)
+        
 def login_with_google():
     try:
-        credentials_path = "client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json"  # Update path as needed
-        SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'openid']
-
+        credentials_path = "client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json"
+        SCOPES = [
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/userinfo.email',
+            'openid'
+        ]
         flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
-        creds = flow.run_local_server(port=8080)  
+        creds = flow.run_local_server(port=8080)
 
-        id_token = creds.id_token  
+        id_token = creds.id_token
 
-    
-        if decoded_token['aud'] != 'lostandfound-78452':  # Your Firebase project ID
-            raise Exception("Audience claim in ID token is invalid!")
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key={API_KEY}"
 
-        email = decoded_token['email']  
+        payload = {
+            "postBody": f"id_token={id_token}&providerId=google.com",
+            "requestUri": "http://localhost",
+            "returnSecureToken": True
+        }
 
-        if "@student.itk.ac.id" not in email:
-            messagebox.showerror("Error", "Only @student.itk.ac.id email addresses are allowed.")
-            return
+        headers = {'Content-Type': 'application/json'}
 
-        db = firestore.client()
-        users_ref = db.collection('users')
+        response = requests.post(url, json=payload, headers=headers)
+        data = response.json()
 
-        user_doc = users_ref.where('email', '==', email).get()
-        if len(user_doc) == 0:
-            username = email.split('@')[0]  
-            users_ref.add({
-                'username': username,
-                'email': email
-            })
+        if response.status_code == 200:
+            email = data['email']
+            name = data['fullName']
 
-        messagebox.showinfo("Success", f"Login successful as {email}.")
-        subprocess.run(["python", "gui.py"])  
+            if "@student.itk.ac.id" not in email:
+                show_popup("Error", "Hanya Email @student.itk.ac.id Saja yang diizinkan.", "error")
+                return
+
+            username = email.split('@')[0]
+            users_ref = db.reference('users')
+            new_user_id = 2
+            user_doc = users_ref.order_by_child('email').equal_to(email).get()
+            if not user_doc:
+                users_ref.child(str(new_user_id)).set({
+                    'id': new_user_id,
+                    'name': name,
+                    'username': username,
+                    'email': email
+                })
+
+            show_popup("Success", f"Login Berhasil as {email} , {name} .", "success")
+
+            threading.Thread(target=run_gui, args=(new_user_id,)).start()
+
+        else:
+            show_popup("Error", f"Login failed: {data.get('error', {}).get('message', 'Unknown error')}", "error")
 
     except Exception as e:
-        messagebox.showerror("Error", f"Login failed: {str(e)}")
+        show_popup("Error", f"Login failed: {str(e)}", "error")
 
-# def login_with_google():
-#     try:
-#         flow = InstalledAppFlow.from_client_secrets_file(
-#             'client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json',
-#             scopes=['https://www.googleapis.com/auth/userinfo.email', 'openid']
-#         )
+def run_gui(user_id):
 
-#         credentials = flow.run_local_server(port=8080, open_browser=True)
+    try:
+        subprocess.run(["python", "gui.py", str(user_id)])
+    except Exception as e:
+        print(f"Error running GUI: {e}")
 
-#         id_token = credentials.id_token
+def close_login():
+    window.destroy()
 
-#         user = auth.sign_in_with_custom_token(id_token)
-#         user_info = auth.get_account_info(user['idToken'])
-
-#         email = user_info['users'][0]['email']
         
-#         if "@student.itk.ac.id" not in email:
-#             messagebox.showerror("Error", "Hanya email @student.itk.ac.id yang diizinkan.")
-#             return
-
-    #     db = firestore.client()
-    #     users_ref = db.collection('users')
-        
-    #     user_doc = users_ref.where('email', '==', email).get()
-    #     if len(user_doc) == 0:
-    #         username = email.split('@')[0]  
-    #         users_ref.add({
-    #             'username': username,
-    #             'email': email
-    #         })
-
-    #     messagebox.showinfo("Success", f"Login berhasil sebagai {email}.")
-    #     subprocess.run(["python", "gui.py"])  
-
-    # except Exception as e:
-    #     messagebox.showerror("Error", f"Gagal login: {str(e)}")
-
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"D:\Tubes\Login\build\assets\frame0")
+ASSETS_PATH = OUTPUT_PATH / "assets" / "frame0"
 
 
 def relative_to_assets(path: str) -> Path:
@@ -112,7 +133,7 @@ canvas = Canvas(
 
 canvas.place(x = 0, y = 0)
 image_image_1 = PhotoImage(
-    file=relative_to_assets("image_1.png"))
+    file=relative_to_assets("itk.png"))
 image_1 = canvas.create_image(
     150.0,
     450.0,
@@ -157,7 +178,7 @@ canvas.create_text(
     890.0,
     255.0,
     anchor="nw",
-    text="Login with Google",
+    text="Login with Google",   
     fill="#2E2E2E",
     font=("Poppins Regular", 16 * -1)
 )
@@ -182,7 +203,7 @@ canvas.create_text(
     922.0,
     329.0,
     anchor="nw",
-    text="OR",
+    text="---",
     fill="#FFFFFF",
     font=("Poppins Regular", 16 * -1)
 )
@@ -196,7 +217,7 @@ canvas.create_rectangle(
     outline="")
 
 image_image_2 = PhotoImage(
-    file=relative_to_assets("image_2.png"))
+    file=relative_to_assets("email.png"))
 image_2 = canvas.create_image(
     685.0,
     430.0,
@@ -230,7 +251,7 @@ canvas.create_rectangle(
     outline="")
 
 image_image_3 = PhotoImage(
-    file=relative_to_assets("image_3.png"))
+    file=relative_to_assets("key.png"))
 image_3 = canvas.create_image(
     685.0,
     529.0,
@@ -256,7 +277,7 @@ canvas.create_text(
 )
 
 button_image_1 = PhotoImage(
-    file=relative_to_assets("button_1.png"))
+    file=relative_to_assets("button_login.png"))
 button_1 = Button(
     image=button_image_1,
     borderwidth=0,
@@ -272,7 +293,7 @@ button_1.place(
 )
 
 image_image_4 = PhotoImage(
-    file=relative_to_assets("image_4.png"))
+    file=relative_to_assets("google.png"))
 image_4 = canvas.create_image(
     865.0,
     264.0,

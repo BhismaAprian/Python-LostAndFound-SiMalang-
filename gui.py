@@ -8,12 +8,19 @@ from pathlib import Path
 from customtkinter import CTk, CTkLabel, CTkFrame, CTkImage, set_appearance_mode
 from PIL import Image
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
+import sys
 
 cred = credentials.Certificate('D:/Tubes/Beta V.1/build/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'lostandfound-78452.appspot.com', 
     'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
 })
+
+if len(sys.argv) > 1:
+    new_user_id = sys.argv[1]  
+else:
+    new_user_id = None  
+
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / "assets" / "frame0"
@@ -25,13 +32,9 @@ def relative_to_assets(path: str) -> Path:
 set_appearance_mode("light")
 
 window = CTk()
-window.geometry("1128x1024")
+window.geometry("1128x784")
 window.configure(bg="#F1F1F1")
 window.title("SIMALANG")
-
-root = Tk()
-window.geometry("1128x1024")
-window.configure(bg = "#F1F1F1")
 
 canvas = Canvas(
     window,
@@ -42,7 +45,6 @@ canvas = Canvas(
     highlightthickness = 0,
     relief = "ridge"
 )
-
 canvas.place(x = 0, y = 0)
 
 sidebar_frame = CTkFrame(
@@ -53,14 +55,22 @@ sidebar_frame = CTkFrame(
     corner_radius=0
 )
 sidebar_frame.place(x=0, y=0)
-
+sidebar_image_path = relative_to_assets("image_1.png")
+sidebar_image = CTkImage(light_image=Image.open(sidebar_image_path), size=(45, 45))
+sidebar_image_label = CTkLabel(
+    sidebar_frame,
+    image=sidebar_image,
+    text="",  
+    fg_color="transparent"
+)
+sidebar_image_label.place(x=25, y=28)  
 sidebar_title = CTkLabel(
     sidebar_frame,
     text="SIMALANG",
     font=("Poppins SemiBold", 25),
     text_color="#2C2745"
 )
-sidebar_title.place(x=65, y=28)
+sidebar_title.place(x=75, y=28)
 
 menu_items = [
     {"name": "Home", "image": "image_3.png"},
@@ -75,22 +85,16 @@ menu_colors = {}
 main_frame = CTkFrame(window, width=837, height=1024, fg_color="#F1F1F1", corner_radius=0)
 main_frame.place(x=291, y=0)
 
-
 def render_content(menu_name):
     for widget in main_frame.winfo_children():
         widget.destroy()
 
     if menu_name == "Home":
-        render_home_content(main_frame)
-        # content_label = CTkLabel(
-        #     main_frame, text="Selamat Datang di Home!", font=("Poppins SemiBold", 20)
-        # )
-        # content_label.place(relx=0.5, rely=0.5, anchor="center")
-
+        render_home_content(main_frame, new_user_id)
     elif menu_name == "Lost":
-        render_lost_content(main_frame, ASSETS_PATH)  
+        render_lost_content(main_frame, ASSETS_PATH, new_user_id)  
     elif menu_name == "Found":
-        render_found_content(main_frame, ASSETS_PATH)  
+        render_found_content(main_frame, ASSETS_PATH, new_user_id)  
 
 
 def select_menu(selected_name):
@@ -117,6 +121,29 @@ def on_leave(event, frame, label, menu_name):
     if menu_colors.get(menu_name, "#FFFFFF") != "#e6f0f7":  
         frame.configure(fg_color="#FFFFFF")  
         label.configure(text_color="#6E7191") 
+
+def show_popup(title, message, popup_type="success"):
+    popup = ctk.CTkToplevel()
+    popup.geometry("300x200")
+    popup.title(title)
+    popup.grab_set()
+
+    colors = {"success": "green", "error": "red", "info": "blue"}
+    bg_color = colors.get(popup_type, "gray")
+
+    header = ctk.CTkLabel(popup, text=title, font=("Arial", 18, "bold"), fg_color=bg_color, text_color="white")
+    header.pack(fill="x", pady=(0, 10))
+
+    message_label = ctk.CTkLabel(popup, text=message, font=("Arial", 14), wraplength=250)
+    message_label.pack(pady=20)
+
+    close_button = ctk.CTkButton(popup, text="Close", command=popup.destroy, fg_color="gray")
+    close_button.pack(pady=10)
+
+    for i in range(0, 101, 5):
+        popup.attributes("-alpha", i / 100)
+        popup.update()
+        popup.after(10)
 
 start_y = 112  
 for item in menu_items:
