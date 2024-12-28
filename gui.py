@@ -9,8 +9,12 @@ from customtkinter import CTk, CTkLabel, CTkFrame, CTkImage, set_appearance_mode
 from PIL import Image
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 import sys
+import os
 
-cred = credentials.Certificate('D:/Tubes/Beta V.1/build/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
+base_dir = os.path.dirname(os.path.abspath(__file__)) 
+cred_path = os.path.join(base_dir, 'cred/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
+
+cred = credentials.Certificate(cred_path)
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'lostandfound-78452.appspot.com', 
     'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
