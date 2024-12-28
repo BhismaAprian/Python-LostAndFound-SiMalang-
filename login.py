@@ -100,12 +100,13 @@ def login_with_google():
         show_popup("Error", f"Login failed: {str(e)}", "error")
 
 def run_gui(user_id):
-
     try:
-        subprocess.run(["python", "gui.py", str(user_id)])
+        base_dir = os.path.dirname(os.path.abspath(__file__))  
+        gui_path = os.path.join(base_dir, "widgets", "gui.py")
+        
+        subprocess.run(["python", gui_path, str(user_id)])
     except Exception as e:
         print(f"Error running GUI: {e}")
-
 def close_login():
     window.destroy()
 
