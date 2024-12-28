@@ -4,10 +4,10 @@
   <table>
     <tr>
       <td align="center">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Lambang_ITK.png" alt="Lambang ITK" width="150">
+        <img src="[https://upload.wikimedia.org/wikipedia/commons/a/a6/Lambang_ITK.png](https://old.itk.ac.id/wp-content/uploads/2020/04/site-logo.png)" alt="Lambang ITK" width="150">
       </td>
       <td align="center">
-        <img src="https://i.ibb.co.com/Pwwkh9X/Whats-App-Image-2024-11-29-at-10-06-32-f11f1702-removebg-preview.png" alt="Project Image" width="150">
+        <img src="https://i.ibb.co/JtQYnTh/Whats-App-Image-2024-11-29-at-10-06-32-f11f1702.jpg" alt="Project Image" width="150">
       </td>
     </tr>
   </table>
@@ -22,6 +22,7 @@ _SIMALANG (Lost and Found Item Information System) is a Python-based desktop app
 
 <h2>🍰 Contributors:</h2>
 
+
 Bhisma
 Chiko
 Austhia
@@ -30,9 +31,8 @@ Ferdi
 Fregita
   
 <h2>💻 Built with</h2>
-
 Technologies used in the project:
-
+---
 *   Python
 *   Tkinter
 *   Custom Tkinter
