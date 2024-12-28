@@ -4,7 +4,7 @@ from io import BytesIO
 from firebase_admin import db
 import requests
 from datetime import datetime
-import tkinter as tk  # Menggunakan tkinter untuk IntVar dan lainnya
+import tkinter as tk  
 
 def start_chat(parent_frame, user_id, item_id):
     chat_ref = db.reference(f'chats/found/{item_id}') 
