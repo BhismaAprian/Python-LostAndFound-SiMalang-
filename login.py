@@ -11,29 +11,11 @@ import threading
 import os
 import json
 
-
-firebase_credentials_json = os.getenv('ADMIN_SDK')
-google_client_secret_json = os.getenv('CLIENT_SECRET')
-
-if not firebase_credentials_json or not google_client_secret_json:
-    raise ValueError("Kredensial tidak ditemukan di environment variables")
-
-base_dir = os.path.dirname(os.path.abspath(__file__))
-
-firebase_credentials_path = os.path.join(base_dir, 'cred', 'firebase_credentials.json')
-google_client_secret_path = os.path.join(base_dir, 'cred', 'google_client_secret.json')
-
-# Simpan data JSON ke dalam file sementara di direktori cred/
-with open(firebase_credentials_path, 'w') as f:
-    f.write(firebase_credentials_json)
-
-with open(google_client_secret_path, 'w') as f:
-    f.write(google_client_secret_json)
-
 base_dir = os.path.dirname(os.path.abspath(__file__))  
+cred_path = os.path.join(base_dir, 'cred/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
 
 API_KEY = "AIzaSyDDhFEVpqjSYbjVhbOj5AwlmmVavC868pM"  
-cred = credentials.Certificate(firebase_credentials_path)
+cred = credentials.Certificate(cred_path)
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'lostandfound-78452.appspot.com', 
     'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
@@ -64,7 +46,7 @@ def show_popup(title, message, popup_type="success"):
         
 def login_with_google():
     try:
-        credentials_path = google_client_secret_path
+        credentials_path = os.path.join(base_dir, "cred/client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json")
         SCOPES = [
             'https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email',
