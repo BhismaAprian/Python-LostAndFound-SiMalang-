@@ -8,10 +8,13 @@ import subprocess
 import requests
 import customtkinter as ctk
 import threading
+import os
 
+base_dir = os.path.dirname(os.path.abspath(__file__))  
+cred_path = os.path.join(base_dir, 'cred/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
 
 API_KEY = "AIzaSyDDhFEVpqjSYbjVhbOj5AwlmmVavC868pM"  
-cred = credentials.Certificate('D:/Tubes/Beta V.1/build/lostandfound-78452-firebase-adminsdk-lfwma-f76a4caa1b.json')
+cred = credentials.Certificate(cred_path)
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'lostandfound-78452.appspot.com', 
     'databaseURL': 'https://lostandfound-78452-default-rtdb.asia-southeast1.firebasedatabase.app'
@@ -42,7 +45,7 @@ def show_popup(title, message, popup_type="success"):
         
 def login_with_google():
     try:
-        credentials_path = "client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json"
+        credentials_path = os.path.join(base_dir, "cred/client_secret_397750283025-8gl75si6f9ictssmrsc4f478de7t7l2s.apps.googleusercontent.com.json")
         SCOPES = [
             'https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email',
