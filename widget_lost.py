@@ -5,7 +5,7 @@ from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton, CTkImage
 from PIL import Image
 from io import BytesIO
 from widget_pengajuan_lost import *
-from chat import *
+from chat_lost import *
 
 import requests  
 
