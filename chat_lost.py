@@ -9,7 +9,7 @@ import tkinter as tk
 def start_chat(parent_frame, user_id, item_id):
     chat_ref = db.reference(f'chats/{item_id}') 
     users_ref = db.reference('users')  
-    item_ref = db.reference(f'lost/{item_id}')  # Referensi untuk item di database (lost atau found)
+    item_ref = db.reference(f'lost/{item_id}') 
 
     def send_message():
         timestamp = datetime.utcnow().isoformat()  
@@ -64,7 +64,6 @@ def start_chat(parent_frame, user_id, item_id):
     def update_is_found():
         item_ref.update({'is_found': is_found_var.get()})
 
-    # Ambil nilai is_found dari Firebase untuk menentukan status awal
     item_data = item_ref.get()
     initial_is_found = item_data.get('is_found', False)
 
@@ -92,14 +91,14 @@ def start_chat(parent_frame, user_id, item_id):
     )
     send_button.pack(side="left", pady=10)
 
-    is_found_var = tk.BooleanVar(value=initial_is_found)  # Gunakan BooleanVar untuk status True/False
+    is_found_var = tk.BooleanVar(value=initial_is_found)  
     toggle_button = CTkSwitch(
         parent_frame,
         text="Sudah Ditemukan?",
-        variable=is_found_var,  # Menghubungkan dengan variabel is_found_var
-        onvalue=True,  # Nilai saat switch ON (ditemukan)
-        offvalue=False,  # Nilai saat switch OFF (belum ditemukan)
-        command=update_is_found  # Memanggil fungsi update_is_found saat toggle berubah
+        variable=is_found_var,  
+        onvalue=True,  
+        offvalue=False,  
+        command=update_is_found  
     )
     toggle_button.pack(pady=20)
 
