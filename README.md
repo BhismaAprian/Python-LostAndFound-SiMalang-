@@ -4,10 +4,10 @@
   <table>
     <tr>
       <td align="center">
-        <img src="https://old.itk.ac.id/wp-content/uploads/2020/04/site-logo.png" alt="Lambang ITK" width="150">
+        <img src="https://old.itk.ac.id/wp-content/uploads/2020/04/site-logo.png" alt="Lambang ITK" width="300">
       </td>
       <td align="center">
-        <img src="https://i.ibb.co/JtQYnTh/Whats-App-Image-2024-11-29-at-10-06-32-f11f1702.jpg" alt="Project Image" width="150">
+        <img src="https://i.ibb.co/JtQYnTh/Whats-App-Image-2024-11-29-at-10-06-32-f11f1702.jpg" alt="Project Image" width="300">
       </td>
     </tr>
   </table>
